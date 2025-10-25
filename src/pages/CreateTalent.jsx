@@ -260,7 +260,7 @@ export default function CreateTalent() {
             <option value="Part-time">Part-time</option>
             <option value="Contract">Contract</option>
             <option value="Gig">Gig</option>
-            <option value="yes">Yes</option>
+            <option value="Yes">Yes</option>
           </select>
         </div>
 
