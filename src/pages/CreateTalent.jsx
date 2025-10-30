@@ -24,13 +24,13 @@ export default function CreateTalent() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // ✅ Handle normal input fields
+  // Handle normal input fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // ✅ Handle file upload
+  // Handle file upload
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -38,33 +38,85 @@ export default function CreateTalent() {
     }
   };
 
-  // ✅ Handle skill addition
+  // ✅ Handle skill addition (supports pasting multiple lines)
   const handleSkillKeyDown = (e) => {
     if ((e.key === "Enter" || e.key === ",") && skillInput.trim()) {
       e.preventDefault();
-      if (!formData.skills.includes(skillInput.trim())) {
-        setFormData({
-          ...formData,
-          skills: [...formData.skills, skillInput.trim()],
-        });
-      }
+
+      // Split input by commas, newlines, or semicolons
+      const newParts = skillInput
+        .split(/[,;\n]+/)
+        .map((v) => v.trim())
+        .filter((v) => v);
+
+      const updatedSkills = [...formData.skills];
+      newParts.forEach((part) => {
+        if (!updatedSkills.includes(part)) updatedSkills.push(part);
+      });
+
+      setFormData({ ...formData, skills: updatedSkills });
       setSkillInput("");
     }
   };
 
-  // ✅ Handle soft skill addition
+  // ✅ Handle skill paste
+  const handleSkillPaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text");
+    const newParts = pasted
+      .split(/[,;\n]+/)
+      .map((v) => v.trim())
+      .filter((v) => v);
+
+    const updatedSkills = [...formData.skills];
+    newParts.forEach((part) => {
+      if (!updatedSkills.includes(part)) updatedSkills.push(part);
+    });
+
+    setFormData({ ...formData, skills: updatedSkills });
+    setSkillInput("");
+  };
+
+
+  // ✅ Handle soft skill addition (supports pasting multiple lines)
   const handleSoftSkillKeyDown = (e) => {
     if ((e.key === "Enter" || e.key === ",") && softSkillInput.trim()) {
       e.preventDefault();
-      if (!formData.softSkills.includes(softSkillInput.trim())) {
-        setFormData({
-          ...formData,
-          softSkills: [...formData.softSkills, softSkillInput.trim()],
-        });
-      }
+
+      // Split input by commas, newlines, or semicolons
+      const newParts = softSkillInput
+        .split(/[,;\n]+/)
+        .map((v) => v.trim())
+        .filter((v) => v);
+
+      const updatedSoftSkills = [...formData.softSkills];
+      newParts.forEach((part) => {
+        if (!updatedSoftSkills.includes(part)) updatedSoftSkills.push(part);
+      });
+
+      setFormData({ ...formData, softSkills: updatedSoftSkills });
       setSoftSkillInput("");
     }
   };
+
+  // ✅ Handle soft skill paste
+  const handleSoftSkillPaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text");
+    const newParts = pasted
+      .split(/[,;\n]+/)
+      .map((v) => v.trim())
+      .filter((v) => v);
+
+    const updatedSoftSkills = [...formData.softSkills];
+    newParts.forEach((part) => {
+      if (!updatedSoftSkills.includes(part)) updatedSoftSkills.push(part);
+    });
+
+    setFormData({ ...formData, softSkills: updatedSoftSkills });
+    setSoftSkillInput("");
+  };
+
 
   // ✅ Remove a tag
   const removeTag = (type, value) => {
@@ -74,7 +126,7 @@ export default function CreateTalent() {
     });
   };
 
-  // ✅ Submit form data
+  // Submit form data
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -240,6 +292,7 @@ export default function CreateTalent() {
             <option value="AI/ML Specialist">AI/ML Specialist</option>
             <option value="Data Scientist">Data Scientist</option>
             <option value="Digital Marketer">Digital Marketer</option>
+            <option value="Full-Stack Developer">Full-Stack Developer</option>
           </select>
         </div>
 
@@ -260,7 +313,7 @@ export default function CreateTalent() {
             <option value="Part-time">Part-time</option>
             <option value="Contract">Contract</option>
             <option value="Gig">Gig</option>
-            <option value="Yes">Yes</option>
+            <option value="yes">Yes</option>
           </select>
         </div>
 
@@ -327,7 +380,7 @@ export default function CreateTalent() {
         {/* Skills */}
         <div>
           <label className="block text-sm font-semibold text-gray-600">
-            Skills <span className="text-gray-400"> (Press Enter after typing a skill, and should be more than one skill)</span>
+            Skills <span className="text-gray-400"> (Add a "," or press Enter after typing a skill, and should be more than one skill)</span>
           </label>
           <div className="flex flex-wrap gap-2 border rounded-lg px-3 py-2">
             {formData.skills.map((skill, index) => (
@@ -351,6 +404,7 @@ export default function CreateTalent() {
               value={skillInput}
               onChange={(e) => setSkillInput(e.target.value)}
               onKeyDown={handleSkillKeyDown}
+              onPaste={handleSkillPaste}
               className="flex-1 outline-none"
             />
           </div>
@@ -359,7 +413,7 @@ export default function CreateTalent() {
         {/* Soft Skills */}
         <div>
           <label className="block text-sm font-semibold text-gray-600">
-            Soft Skills <span className="text-gray-400"> (Press Enter after typing a skill, and should be more than one skill)</span>
+            Soft Skills <span className="text-gray-400"> (Add a "," or press Enter after typing a skill, and should be more than one skill)</span>
           </label>
           <div className="flex flex-wrap gap-2 border rounded-lg px-3 py-2">
             {formData.softSkills.map((soft, index) => (
@@ -383,6 +437,7 @@ export default function CreateTalent() {
               value={softSkillInput}
               onChange={(e) => setSoftSkillInput(e.target.value)}
               onKeyDown={handleSoftSkillKeyDown}
+              onPaste={handleSoftSkillPaste}
               className="flex-1 outline-none"
             />
           </div>
@@ -401,9 +456,8 @@ export default function CreateTalent() {
       {/* Message */}
       {message && (
         <p
-          className={`text-center mt-4 font-semibold ${
-            message.includes("✅") ? "text-green-600" : "text-red-600"
-          }`}
+          className={`text-center mt-4 font-semibold ${message.includes("✅") ? "text-green-600" : "text-red-600"
+            }`}
         >
           {message}
         </p>
