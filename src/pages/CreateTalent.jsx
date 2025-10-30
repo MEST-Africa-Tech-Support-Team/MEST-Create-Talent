@@ -144,7 +144,7 @@ export default function CreateTalent() {
     });
 
     try {
-      const response = await apiClient.post("/talent/old", data, {
+      const response = await apiClient.post("/api/V1/talent/old", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
