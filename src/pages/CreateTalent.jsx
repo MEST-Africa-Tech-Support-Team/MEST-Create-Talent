@@ -17,6 +17,9 @@ export default function CreateTalent() {
     educationSummary: "",
     skills: [],
     softSkills: [],
+    projects: [{ title: "", description: "", link: "" }], // ADDED (Start with one empty project)
+    location: { country: "", city: "" }, // ADDED
+    isRemote: false, // ADDED
   });
 
   const [skillInput, setSkillInput] = useState("");
@@ -38,7 +41,7 @@ export default function CreateTalent() {
     }
   };
 
-  // ✅ Handle skill addition (supports pasting multiple lines)
+  // Handle skill addition (supports pasting multiple lines)
   const handleSkillKeyDown = (e) => {
     if ((e.key === "Enter" || e.key === ",") && skillInput.trim()) {
       e.preventDefault();
@@ -59,7 +62,7 @@ export default function CreateTalent() {
     }
   };
 
-  // ✅ Handle skill paste
+  // Handle skill paste
   const handleSkillPaste = (e) => {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text");
@@ -78,7 +81,7 @@ export default function CreateTalent() {
   };
 
 
-  // ✅ Handle soft skill addition (supports pasting multiple lines)
+  // Handle soft skill addition (supports pasting multiple lines)
   const handleSoftSkillKeyDown = (e) => {
     if ((e.key === "Enter" || e.key === ",") && softSkillInput.trim()) {
       e.preventDefault();
@@ -99,7 +102,7 @@ export default function CreateTalent() {
     }
   };
 
-  // ✅ Handle soft skill paste
+  // Handle soft skill paste
   const handleSoftSkillPaste = (e) => {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text");
@@ -118,13 +121,62 @@ export default function CreateTalent() {
   };
 
 
-  // ✅ Remove a tag
+  // Handle location field changes (nested object)
+  const handleLocationChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      location: {
+        ...formData.location,
+        [name]: value,
+      },
+    });
+  };
+
+  // Handle isRemote change (boolean select)
+  const handleIsRemoteChange = (e) => {
+    // Convert the string value "true" or "false" from the select box back to a boolean
+    setFormData({ ...formData, isRemote: e.target.value === "true" });
+  };
+
+  // Handle changes for a specific project field
+  const handleProjectChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedProjects = formData.projects.map((project, i) => {
+      if (i === index) {
+        return { ...project, [name]: value };
+      }
+      return project;
+    });
+    setFormData({ ...formData, projects: updatedProjects });
+  };
+
+  // Add a new project entry
+  const addProject = () => {
+    setFormData({
+      ...formData,
+      projects: [
+        ...formData.projects,
+        { title: "", description: "", link: "" },
+      ],
+    });
+  };
+
+  // Remove a project entry
+  const removeProject = (index) => {
+    const updatedProjects = formData.projects.filter((_, i) => i !== index);
+    setFormData({ ...formData, projects: updatedProjects });
+  };
+
+
+  // Remove a tag
   const removeTag = (type, value) => {
     setFormData({
       ...formData,
       [type]: formData[type].filter((tag) => tag !== value),
     });
   };
+
 
   // Submit form data
   const handleSubmit = async (e) => {
@@ -134,17 +186,43 @@ export default function CreateTalent() {
 
     const data = new FormData();
 
-    // Append all fields correctly
+    // Append all fields with special handling for nested data
     Object.entries(formData).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((item) => data.append(key, item)); // backend expects arrays
-      } else {
-        data.append(key, value);
+      if (value === null || value === undefined) return;
+
+      // 1. Handle simple string arrays (skills, softSkills)
+      if (key === "skills" || key === "softSkills") {
+        value.forEach((item) => data.append(key, item));
+        return;
       }
+
+      // 2. Handle complex array of objects (projects) using indexed keys
+      if (key === "projects" && Array.isArray(value)) {
+        value.forEach((project, index) => {
+          // Only append projects if they have at least a title
+          if (project.title) {
+            data.append(`projects[${index}][title]`, project.title);
+            data.append(`projects[${index}][description]`, project.description);
+            data.append(`projects[${index}][link]`, project.link);
+          }
+        });
+        return;
+      }
+
+      // 3. Handle simple nested object (location) using indexed keys
+      if (key === "location" && typeof value === "object" && !Array.isArray(value)) {
+        data.append(`location[country]`, value.country);
+        data.append(`location[city]`, value.city);
+        return;
+      }
+
+      // 4. Handle boolean/files/strings (including isRemote)
+      data.append(key, value);
     });
 
     try {
-      const response = await apiClient.post("/api/V1/talent/old", data, {
+      // NOTE: Using the new endpoint from your Postman example
+      const response = await apiClient.post("/talent/old", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -165,6 +243,9 @@ export default function CreateTalent() {
         educationSummary: "",
         skills: [],
         softSkills: [],
+        projects: [{ title: "", description: "", link: "" }], // Reset with new fields
+        location: { country: "", city: "" },
+        isRemote: false,
       });
     } catch (error) {
       console.error("Error creating talent:", error);
@@ -442,6 +523,129 @@ export default function CreateTalent() {
             />
           </div>
         </div>
+
+
+        {/* Location & Remote Status */}
+        <h3 className="text-xl font-bold mb-3 pt-4 border-t mt-4 text-gray-800">
+          Location & Remote Status
+        </h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-600">
+              Country
+            </label>
+            <input
+              type="text"
+              name="country"
+              placeholder="e.g., Ghana"
+              value={formData.location.country}
+              onChange={handleLocationChange}
+              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-600">
+              City
+            </label>
+            <input
+              type="text"
+              name="city"
+              placeholder="e.g., Accra"
+              value={formData.location.city}
+              onChange={handleLocationChange}
+              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-600">
+              Remote Available?
+            </label>
+            <select
+              name="isRemote"
+              // Convert boolean to string for the select value
+              value={formData.isRemote.toString()}
+              onChange={handleIsRemoteChange}
+              className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+            >
+              <option value="false">No (On-site/Hybrid)</option>
+              <option value="true">Yes (Fully Remote)</option>
+            </select>
+          </div>
+        </div>
+
+
+        {/* Projects Section */}
+        <div>
+          <h3 className="text-xl font-bold mb-3 pt-4 border-t mt-4 text-gray-800">
+            Projects
+          </h3>
+          <div className="space-y-4">
+            {formData.projects.map((project, index) => (
+              <div
+                key={index}
+                className="border p-4 rounded-lg bg-gray-50 relative"
+              >
+                {formData.projects.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeProject(index)}
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-lg leading-none"
+                  >
+                    ✕
+                  </button>
+                )}
+                <p className="text-sm font-semibold mb-2 text-gray-700">
+                  Project {index + 1}
+                </p>
+                {/* Project Title */}
+                <div className="mb-2">
+                  <label className="block text-sm font-medium">Title</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={project.title}
+                    onChange={(e) => handleProjectChange(index, e)}
+                    placeholder="E-commerce Platform Redesign"
+                    className="w-full border rounded-lg px-3 py-1 mt-1 outline-none focus:ring-1 focus:ring-blue-400"
+                  />
+                </div>
+                {/* Project Description */}
+                <div className="mb-2">
+                  <label className="block text-sm font-medium">Description</label>
+                  <textarea
+                    name="description"
+                    rows="2"
+                    value={project.description}
+                    onChange={(e) => handleProjectChange(index, e)}
+                    placeholder="Developed a full-stack e-commerce site..."
+                    className="w-full border rounded-lg px-3 py-1 mt-1 resize-none outline-none focus:ring-1 focus:ring-blue-400"
+                  ></textarea>
+                </div>
+                {/* Project Link */}
+                <div>
+                  <label className="block text-sm font-medium">Link</label>
+                  <input
+                    type="url"
+                    name="link"
+                    value={project.link}
+                    onChange={(e) => handleProjectChange(index, e)}
+                    placeholder="https://github.com/..."
+                    className="w-full border rounded-lg px-3 py-1 mt-1 outline-none focus:ring-1 focus:ring-blue-400"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={addProject}
+            className="mt-2 w-full border border-[#28BBBB] text-[#28BBBB] py-2 rounded-lg hover:bg-[#28BBBB]/10 transition font-semibold"
+          >
+            + Add Another Project
+          </button>
+        </div>
+
 
         {/* Submit */}
         <button

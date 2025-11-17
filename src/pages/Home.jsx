@@ -22,12 +22,20 @@ export default function Home() {
       </p>
 
       {/* Button */}
-      <Link
-        to="/create-talent"
-        className="bg-[#28BBBB] hover:bg-[#42a0a0] text-white font-semibold py-3 px-8 rounded-xl shadow-md transition duration-300 ease-in-out"
-      >
-        Add New Talent
-      </Link>
+      <div className="flex gap-4">
+        <Link
+          to="/create-talent"
+          className="bg-[#28BBBB] hover:bg-[#42a0a0] text-white font-semibold py-3 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
+        >
+          <span className="font-bold pr-2">+</span>Add New Talent
+        </Link>
+        <Link
+          to="/update-details"
+          className="bg-[#28BBBB] hover:bg-[#42a0a0] text-white font-semibold py-3 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
+        >
+          Edit Talent Details
+        </Link>
+      </div>
     </div>
   );
 }
