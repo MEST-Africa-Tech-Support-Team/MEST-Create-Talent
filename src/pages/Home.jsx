@@ -22,7 +22,7 @@ export default function Home() {
       </p>
 
       {/* Button */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 mb-6">
         <Link
           to="/create-talent"
           className="bg-[#28BBBB] hover:bg-[#42a0a0] text-white font-semibold py-3 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
@@ -36,6 +36,13 @@ export default function Home() {
           Edit Talent Details
         </Link>
       </div>
+
+      <Link
+          to="/create-project"
+          className="bg-[#28BBBB] hover:bg-[#42a0a0] text-white font-semibold py-3 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
+        >
+          <span className="font-bold pr-2">+</span>Add Project
+        </Link>
     </div>
   );
 }
