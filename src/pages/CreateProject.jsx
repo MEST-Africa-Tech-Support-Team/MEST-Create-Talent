@@ -6,6 +6,7 @@ export default function CreateProject() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    projectType: "",
     links: {
       gitHub: "",
       live: "",
@@ -141,6 +142,7 @@ export default function CreateProject() {
 
     data.append("title", formData.title);
     data.append("description", formData.description);
+    data.append("projectType", formData.projectType);
 
     data.append("links[gitHub]", formData.links.gitHub);
     data.append("links[live]", formData.links.live);
@@ -172,6 +174,7 @@ export default function CreateProject() {
       setFormData({
         title: "",
         description: "",
+        projectType: "",
         links: { gitHub: "", live: "" },
         techStack: [],
         createdBy: [],
@@ -181,7 +184,7 @@ export default function CreateProject() {
       console.error(error);
       setMessage(
         error?.response?.data?.message ||
-          "❌ Failed to create project."
+        "❌ Failed to create project."
       );
     } finally {
       setLoading(false);
@@ -225,6 +228,37 @@ export default function CreateProject() {
             onChange={handleChange}
             className="w-full border rounded-lg px-4 py-2 resize-none"
           />
+        </div>
+
+        {/* Project Type */}
+        <div>
+          <label className="block text-sm font-semibold">
+            Project Type
+          </label>
+          <select
+            name="projectType"
+            value={formData.projectType}
+            onChange={handleChange}
+            required
+            className="w-full border rounded-lg px-4 py-2 bg-white"
+          >
+            <option value="">Select project type</option>
+            <option value="PORTFOLIO_PERSONAL">Portfolio / Personal</option>
+            <option value="ECOMMERCE">E-commerce</option>
+            <option value="FINTECH">Fintech</option>
+            <option value="SAAS_PRODUCTIVITY">SaaS / Productivity</option>
+            <option value="SOCIAL_COMMUNICATION">Social / Communication</option>
+            <option value="ENTERTAINMENT_MEDIA">Entertainment / Media</option>
+            <option value="EDTECH">EdTech</option>
+            <option value="HEALTH_FITNESS">Health & Fitness</option>
+            <option value="AI_MACHINE_LEARNING">AI / Machine Learning</option>
+            <option value="WEB3_BLOCKCHAIN">Web3 / Blockchain</option>
+            <option value="UTILITIES_TOOLS">Utilities / Tools</option>
+            <option value="OPEN_SOURCE">Open Source</option>
+            <option value="ADVERTISEMENT">Advertisement</option>
+            <option value="GAMING">Gaming</option>
+            <option value="MARKETING">Marketing</option>
+          </select>
         </div>
 
         {/* Links */}
@@ -281,7 +315,7 @@ export default function CreateProject() {
 
         {/* Created By */}
         <div>
-          <label className="block text-sm font-semibold">Created By</label>
+          <label className="block text-sm font-semibold">Created By <span className="text-gray-500">(Press Enter or ",")</span></label>
           <div className="flex flex-wrap gap-2 border rounded-lg px-3 py-2">
             {formData.createdBy.map((name) => (
               <span
@@ -329,9 +363,8 @@ export default function CreateProject() {
 
       {message && (
         <p
-          className={`text-center mt-4 font-semibold ${
-            message.includes("✅") ? "text-green-600" : "text-red-600"
-          }`}
+          className={`text-center mt-4 font-semibold ${message.includes("✅") ? "text-green-600" : "text-red-600"
+            }`}
         >
           {message}
         </p>

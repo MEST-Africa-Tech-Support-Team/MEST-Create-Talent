@@ -3,6 +3,7 @@ import CreateTalent from "./pages/CreateTalent";
 import Home from "./pages/Home";
 import UpdateDetails from "./pages/UpdateDetails";
 import CreateProject from "./pages/CreateProject";
+import UpdateProjectDetails from "./pages/UpdateProjectDetails";
 import NotFound from "./pages/NotFound";
 // import SignUp from "./pages/SignUp";
 // import Login from "./pages/Login";
@@ -14,6 +15,7 @@ const createTalentRouter = createBrowserRouter([
     { path: '/create-talent', element: <CreateTalent /> },
     { path: '/create-project', element: <CreateProject /> },
     { path: '/update-details', element: <UpdateDetails /> },
+    { path: '/update-project-details', element: <UpdateProjectDetails /> },
     { path: '*', element: <NotFound /> },
   ]);
 

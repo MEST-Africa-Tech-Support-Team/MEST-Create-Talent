@@ -114,7 +114,23 @@ export default function UpdateDetails() {
   return (
     <>
       <PageWrapper className="bg-white">
-        <Banner />
+        <Banner
+          title={
+            <>
+              Discover Africa's Brightest{" "}
+              <br className="hidden sm:block" />
+              Tech Talents
+            </>
+          }
+          subtitle="- Edit Talent Profile"
+          description={
+            <>
+              Connect with skilled professionals ready to transform your projects and{" "}
+              <br className="hidden sm:block" />
+              drive innovation forward
+            </>
+          }
+        />
 
         <div className="min-h-[100vh] px-4 bg-white">
           <div className="my-8 flex flex-col md:flex-row gap-4 items-center justify-center max-w-4xl mx-auto">

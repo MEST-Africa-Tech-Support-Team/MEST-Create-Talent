@@ -37,12 +37,20 @@ export default function Home() {
         </Link>
       </div>
 
-      <Link
+      <div className="flex gap-4 mb-6">
+        <Link
           to="/create-project"
           className="bg-[#28BBBB] hover:bg-[#42a0a0] text-white font-semibold py-3 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
         >
-          <span className="font-bold pr-2">+</span>Add Project
+          <span className="font-bold pr-2">+</span>Add New Project
         </Link>
+        <Link
+          to="/update-project-details"
+          className="bg-[#28BBBB] hover:bg-[#42a0a0] text-white font-semibold py-3 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
+        >
+          Edit Project Details
+        </Link>
+      </div>
     </div>
   );
 }
