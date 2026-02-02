@@ -3,13 +3,13 @@ import { X } from "lucide-react";
 import { apiClient, authHeader } from "../../api/client";
 
 export default function EditProjectModal({ project, onClose, onUpdated }) {
-  
+
 
   const [formData, setFormData] = useState({
     title: project?.title || "",
     description: project?.description || "",
     projectType: project?.projectType || "",
-    
+
     links: {
       gitHub: project?.links?.gitHub || "",
       live: project?.links?.live || "",
@@ -90,8 +90,17 @@ export default function EditProjectModal({ project, onClose, onUpdated }) {
       data.append("title", formData.title);
       data.append("description", formData.description);
       data.append("projectType", formData.projectType);
-      data.append("links[gitHub]", formData.links.gitHub);
-      data.append("links[live]", formData.links.live);
+
+      // data.append("links[gitHub]", formData.links.gitHub);
+      // data.append("links[live]", formData.links.live);
+
+      if (formData.links.gitHub.trim()) {
+        data.append("links[gitHub]", formData.links.gitHub);
+      }
+
+      if (formData.links.live.trim()) {
+        data.append("links[live]", formData.links.live);
+      }
 
       formData.techStack.forEach((tech, index) => data.append(`techStack[${index}]`, tech));
       formData.createdBy.forEach((name, index) => data.append(`createdBy[${index}]`, name));
@@ -114,9 +123,9 @@ export default function EditProjectModal({ project, onClose, onUpdated }) {
   };
 
   return (
-    
+
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 backdrop-blur-sm">
-      
+
       <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
 
         <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">

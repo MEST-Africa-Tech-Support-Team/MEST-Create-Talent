@@ -144,8 +144,16 @@ export default function CreateProject() {
     data.append("description", formData.description);
     data.append("projectType", formData.projectType);
 
-    data.append("links[gitHub]", formData.links.gitHub);
-    data.append("links[live]", formData.links.live);
+    // data.append("links[gitHub]", formData.links.gitHub);
+    // data.append("links[live]", formData.links.live);
+
+    if (formData.links.gitHub.trim()) {
+      data.append("links[gitHub]", formData.links.gitHub);
+    }
+
+    if (formData.links.live.trim()) {
+      data.append("links[live]", formData.links.live);
+    }
 
     formData.techStack.forEach((tech, index) => {
       data.append(`techStack[${index}]`, tech);
