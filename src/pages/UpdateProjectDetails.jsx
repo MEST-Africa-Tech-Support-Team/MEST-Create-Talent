@@ -6,30 +6,76 @@ import PageWrapper from "../components/PageWrapper";
 import Footer from "../components/Footer";
 import Banner from "../components/Banner.jsx";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal.jsx";
+import TalentPagination from "../components/TalentPagination.jsx";
+
+const PROJECT_TYPES = [
+  "PORTFOLIO_PERSONAL",
+  "ECOMMERCE",
+  "FINTECH",
+  "SAAS_PRODUCTIVITY",
+  "SOCIAL_COMMUNICATION",
+  "ENTERTAINMENT_MEDIA",
+  "EDTECH",
+  "HEALTH_FITNESS",
+  "AI_MACHINE_LEARNING",
+  "WEB3_BLOCKCHAIN",
+  "UTILITIES_TOOLS",
+  "OPEN_SOURCE",
+  "ADVERTISEMENT",
+  "GAMING",
+  "MARKETING",
+];
 
 export default function UpdateProjectDetails() {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Search & Filter
+  const [search, setSearch] = useState("");
+  const [projectType, setProjectType] = useState("");
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const LIMIT = 12;
 
   const fetchProjects = async () => {
+    setLoading(true);
+
     try {
-      const res = await apiClient.get("/projects", {
-        headers: authHeader(),
-      });
+      const isFiltering = projectType || search;
+      let res;
 
-      const projectsData = res.data.projects || res.data;
+      // No filter / search → fetch ALL projects
+      if (!isFiltering) {
+        res = await apiClient.get("/projects", {
+          headers: authHeader(),
+        });
 
-      if (Array.isArray(projectsData)) {
-        setProjects(projectsData);
-      } else {
-        console.error("Projects response is not an array:", res.data);
-        setProjects([]);
+        const projectsData = res.data.projects || res.data;
+        setProjects(Array.isArray(projectsData) ? projectsData : []);
+        setTotalPages(1);
       }
-    } catch (err) {
-      console.error(err);
+      // Filter / search → paginated endpoint
+      else {
+        res = await apiClient.get("/projects/filter", {
+          headers: authHeader(),
+          params: {
+            projectType: projectType || undefined,
+            title: search || undefined,
+            page: currentPage,
+            limit: LIMIT,
+          },
+        });
+
+        setProjects(res.data.projects || []);
+        setTotalPages(res.data.totalPages || 1);
+      }
+    } catch (error) {
+      console.error(error);
       setProjects([]);
     } finally {
       setLoading(false);
@@ -38,7 +84,7 @@ export default function UpdateProjectDetails() {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [currentPage, projectType, search]);
 
   /* ---------- CONFIRM DELETE ---------- */
   const confirmDelete = async () => {
@@ -60,12 +106,6 @@ export default function UpdateProjectDetails() {
     }
   };
 
-  const [search, setSearch] = useState("");
-
-  const filteredProjects = projects.filter((project) =>
-    project.title.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <PageWrapper className="bg-white">
       <Banner
@@ -75,14 +115,37 @@ export default function UpdateProjectDetails() {
       />
 
       <div className="mt-8 max-w-6xl mx-auto px-4">
-        <input
-          type="text"
-          placeholder="Search projects by title"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="block mx-auto w-full md:w-1/2 lg:w-1/3 pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-primary-100)] text-gray-900 placeholder-gray-500"
-        />
+        {/* Search + Filter */}
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+          <input
+            type="text"
+            placeholder="Search projects by title"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full md:w-1/2 lg:w-1/3 pl-10 pr-4 py-3 border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none"
+          />
 
+          <select
+            value={projectType}
+            onChange={(e) => {
+              setProjectType(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="px-6 py-3 rounded-xl bg-white border border-gray-300 shadow-sm focus:outline-none focus:ring-1 focus:ring-[#28BBBB] cursor-pointer"
+          >
+            <option value="">All Project Types</option>
+            {PROJECT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type.replaceAll("_", " ")}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Projects */}
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {loading && (
@@ -90,13 +153,15 @@ export default function UpdateProjectDetails() {
                 Loading projects...
               </p>
             )}
+
             {!loading && projects.length === 0 && (
               <p className="col-span-full text-center text-gray-500">
                 No projects found.
               </p>
             )}
+
             {!loading &&
-              filteredProjects.map((project) => (
+              projects.map((project) => (
                 <ProjectCard
                   key={project._id}
                   project={project}
@@ -105,6 +170,16 @@ export default function UpdateProjectDetails() {
                 />
               ))}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <TalentPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
+
           {selectedProject && (
             <EditProjectModal
               project={selectedProject}
@@ -114,7 +189,7 @@ export default function UpdateProjectDetails() {
           )}
         </div>
 
-        {/* DELETE MODAL */}
+        {/* ❌ Delete Modal */}
         <ConfirmDeleteModal
           open={!!deleteTarget}
           title="Delete Project"
@@ -124,6 +199,7 @@ export default function UpdateProjectDetails() {
           loading={deleting}
         />
       </div>
+
       <Footer />
     </PageWrapper>
   );
